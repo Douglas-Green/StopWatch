@@ -1,91 +1,79 @@
-// stop watch program to keep track of time while doing some activity.
+const labels = {
+  minutes: document.getElementById("minutes"),
+  seconds: document.getElementById("seconds"),
+  milliseconds: document.getElementById("milliseconds"),
+};
 
-const minutesLabel = document.getElementById('minutes');
-const secondsLabel = document.getElementById('seconds');
-const millisecondsLabel = document.getElementById('milliseconds');
+const buttons = {
+  start: document.getElementById("startButton"),
+  stop: document.getElementById("stopButton"),
+  pause: document.getElementById("pauseButton"),
+  reset: document.getElementById("resetButton"),
+};
 
-const startButton = document.getElementById('startButton');
-const stopButton = document.getElementById('stopButton');
-const pauseButton = document.getElementById('pauseButton');
-const resetButton = document.getElementById('resetButton');
+const lapList = document.getElementById("lapList");
 
-const list = document.getElementById('list');
+let startTime;
+let elapsedTime = 0;
+let interval;
 
-// VARIABLES
-
-let minutes = 0;
-let seconds = 0;
-let milliseconds = 0;
-let interval = 0;
-
-statButton.addEventListener('click', startTimer);
-stopButton.addEventListener('click', stopTimer);
-pauseButton.addEventListener('click', pauseTimer);
-resetButton.addEventListener('click', resetTimer);
-
-// FUNCTIONS
+buttons.start.addEventListener("click", startTimer);
+buttons.stop.addEventListener("click", stopTimer);
+buttons.pause.addEventListener("click", pauseTimer);
+buttons.reset.addEventListener("click", resetTimer);
 
 function startTimer() {
-  interval = getInterval(updateTimer,10);
-  startButton.disabled = true;
-
+  startTime = Date.now() - elapsedTime;
+  interval = setInterval(updateTimer, 10);
+  toggleButtons(true, false, true, true);
 }
 
 function stopTimer() {
   clearInterval(interval);
-  addToLapList();
+  addToList();
   resetTimerData();
-  startButton.disabled = false;
-
+  toggleButtons(false, true, false, true);
 }
 
 function pauseTimer() {
   clearInterval(interval);
-  pauseButton.disabled = true;
-
+  toggleButtons(false, true, false, true);
 }
 
 function resetTimer() {
   clearInterval(interval);
   resetTimerData();
-  startButton.disabled = false;
-
+  toggleButtons(false, true, false, true);
 }
 
 function updateTimer() {
-  milliseconds++;
-  if(milliseconds === 100) {
-    milliseconds = 0;
-    seconds++
-    if(seconds === 60) {
-      seconds = 0;
-      minutes++;
-    }
-  }
-  displayTimer();
-}
-
-function displayTimer() {
-  millisecondsLabel.textContent = padTime(milliseconds);
-  secondsLabel.textContent = padTime(seconds);
-  minutesLabel.textContent = padTime(minutes);
-}
-
-function padTime(time) {
-  return time.toString().padStart(2, '0');
+  elapsedTime = Date.now() - startTime;
+  let time = new Date(elapsedTime);
+  labels.minutes.textContent = String(time.getMinutes()).padStart(2, "0");
+  labels.seconds.textContent = String(time.getSeconds()).padStart(2, "0");
+  labels.milliseconds.textContent = String(
+    Math.floor(time.getMilliseconds() / 10)
+  ).padStart(2, "0");
 }
 
 function resetTimerData() {
-  minutes = 0;
-  seconds = 0;
-  milliseconds = 0;
-  displayTimer();
+  elapsedTime = 0;
+  labels.minutes.textContent = "00";
+  labels.seconds.textContent = "00";
+  labels.milliseconds.textContent = "00";
 }
 
 function addToList() {
-  const lapTime = `${padTime(minutes)}: ${padTime(seconds)}:${padTime(milliseconds)}`;
-
-  const listItem = document.createElement('li');
-  listItem.innerHTML = `<span>Lap ${laplist.childElementCount + 1}: </span>${lapTime}`;
+  const listItem = document.createElement("li");
+  listItem.textContent = `Lap ${lapList.childElementCount + 1}: ${
+    labels.minutes.textContent
+  }:${labels.seconds.textContent}:${labels.milliseconds.textContent}`;
   lapList.appendChild(listItem);
-} 
+}
+
+function toggleButtons(start, stop, pause, reset) {
+  buttons.start.disabled = start;
+  buttons.stop.disabled = stop;
+  buttons.pause.disabled = pause;
+  buttons.reset.disabled = reset;
+}
