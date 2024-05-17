@@ -25,55 +25,57 @@ buttons.reset.addEventListener("click", resetTimer);
 function startTimer() {
   startTime = Date.now() - elapsedTime;
   interval = setInterval(updateTimer, 10);
-  toggleButtons(true, false, true, true);
+  resetAndToggleButtons();
 }
 
 function stopTimer() {
   clearInterval(interval);
   addToList();
-  resetTimerData();
-  toggleButtons(false, true, false, true);
+  resetAndToggleButtons();
 }
 
 function pauseTimer() {
   clearInterval(interval);
-  toggleButtons(false, true, false, true);
+  resetAndToggleButtons();
 }
 
 function resetTimer() {
   clearInterval(interval);
-  resetTimerData();
-  toggleButtons(false, true, false, true);
+  resetAndToggleButtons();
 }
 
 function updateTimer() {
   elapsedTime = Date.now() - startTime;
-  let time = new Date(elapsedTime);
-  labels.minutes.textContent = String(time.getMinutes()).padStart(2, "0");
-  labels.seconds.textContent = String(time.getSeconds()).padStart(2, "0");
-  labels.milliseconds.textContent = String(
-    Math.floor(time.getMilliseconds() / 10)
-  ).padStart(2, "0");
+  const time = formatTime(elapsedTime);
+  labels.minutes.textContent = time.minutes;
+  labels.seconds.textContent = time.seconds
+  labels.milliseconds.textContent = time.milliseconds;
 }
 
-function resetTimerData() {
+function formatTime(elapsedTime) {
+  const minutes = Math.floor(elapsedTime / 60000);
+  const seconds = Math.floor((elapsedTime % 60000) / 1000);
+  const milliseconds = Math.floor((elapsedTime % 1000) / 10);
+  return {
+    minutes: String(minutes).padStart(2, "0"),
+    seconds: String(seconds).padStart(2, "0"),
+    milliseconds: String(milliseconds).padStart(2, "0"),
+  };
+}
+
+function addToList() {
+const listItem = document.createElement("li");
+listItem.textContent = `Lap ${lapList.childElementCount + 1}: ${labels.minutes.textContent}:${labels.seconds.textContent}:${labels.milliseconds.textContent}`;
+lapList.appendChild(listItem);
+}
+  
+function resetAndToggleButtons() {
   elapsedTime = 0;
   labels.minutes.textContent = "00";
   labels.seconds.textContent = "00";
   labels.milliseconds.textContent = "00";
-}
-
-function addToList() {
-  const listItem = document.createElement("li");
-  listItem.textContent = `Lap ${lapList.childElementCount + 1}: ${
-    labels.minutes.textContent
-  }:${labels.seconds.textContent}:${labels.milliseconds.textContent}`;
-  lapList.appendChild(listItem);
-}
-
-function toggleButtons(start, stop, pause, reset) {
-  buttons.start.disabled = start;
-  buttons.stop.disabled = stop;
-  buttons.pause.disabled = pause;
-  buttons.reset.disabled = reset;
+  buttons.start.disabled = false;
+  buttons.stop.disabled = true;
+  buttons.pause.disabled = true;
+  buttons.reset.disabled = true;
 }
